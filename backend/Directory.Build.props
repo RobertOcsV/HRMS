@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Seu Nome</Authors>
+    <Company>HRMS</Company>
+    <Product>HRMS - Sistema de Gestao de Recursos Humanos</Product>
+    <Copyright>Copyright 2025</Copyright>
+  </PropertyGroup>
+</Project>

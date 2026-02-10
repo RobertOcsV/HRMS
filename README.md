@@ -1,27 +1,16 @@
 # HRMS - Sistema de Gestão de Recursos Humanos
 
-<div align="center">
-
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-19-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-**Sistema completo para gestão de colaboradores, férias, ponto e avaliações de desempenho.**
-
-[Demonstração](#-demonstração) •
-[Funcionalidades](#-funcionalidades) •
-[Tecnologias](#-tecnologias) •
-[Arquitetura](#-arquitetura) •
-[Instalação](#-instalação) •
-[API](#-documentação-da-api)
-
-</div>
+Sistema completo para gestão de colaboradores, férias, ponto e avaliações de desempenho.
 
 ---
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 O HRMS é uma solução web moderna para departamentos de Recursos Humanos, desenvolvida com foco em boas práticas de arquitetura de software, código limpo e experiência do usuário.
 
@@ -38,9 +27,10 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 ### Gestão de Colaboradores
+
 - Cadastro completo com dados pessoais e profissionais
 - Estrutura hierárquica com gestor direto
 - Histórico de mudanças de cargo e departamento
@@ -49,14 +39,16 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 - Processo de desligamento com registro de motivo
 
 ### Gestão de Férias e Ausências
+
 - Solicitação de férias com validação de saldo
-- Workflow de aprovação multinível (Gestor → RH)
+- Workflow de aprovação multinível (Gestor -> RH)
 - Diferentes tipos de ausência: atestado, falta justificada, licenças
 - Calendário visual de ausências da equipe
 - Notificações por email nas mudanças de status
 - Relatórios de saldo por departamento
 
 ### Folha de Ponto
+
 - Registro de entrada e saída
 - Captura de geolocalização (versão mobile)
 - Cálculo automático de horas trabalhadas
@@ -66,6 +58,7 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 - Banco de horas
 
 ### Avaliação de Desempenho
+
 - Criação de ciclos de avaliação
 - Critérios configuráveis por cargo
 - Autoavaliação e avaliação pelo gestor
@@ -74,6 +67,7 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 - Histórico completo do colaborador
 
 ### Dashboard e Relatórios
+
 - Indicadores de headcount e turnover
 - Distribuição por departamento e cargo
 - Status de férias e ausências
@@ -82,7 +76,7 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 
 ---
 
-## 🛠 Tecnologias
+## Tecnologias
 
 ### Backend
 
@@ -97,6 +91,7 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 | MediatR | 12.x | CQRS e Mediator pattern |
 | FluentValidation | 11.x | Validação de dados |
 | Serilog | 4.x | Logging estruturado |
+| BCrypt.Net-Next | 4.x | Hash de senhas |
 
 ### Frontend
 
@@ -114,14 +109,14 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 | Serviço | Propósito |
 |---------|-----------|
 | Railway | Hospedagem do backend e PostgreSQL |
-| Vercel | Hospedagem do frontend |
+| Cloudflare Pages | Hospedagem do frontend |
 | Upstash | Redis serverless |
 | Cloudflare R2 | Armazenamento de arquivos |
 | GitHub Actions | CI/CD |
 
 ---
 
-## 🏗 Arquitetura
+## Arquitetura
 
 ### Visão Geral
 
@@ -129,28 +124,70 @@ Empresas de médio porte frequentemente gerenciam processos de RH em planilhas d
 ┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
 │                 │         │                 │         │                 │
 │  Angular SPA    │◄───────►│  ASP.NET Core   │◄───────►│   PostgreSQL    │
-│  (Vercel)       │  HTTPS  │  Web API        │         │   (Railway)     │
+│  (CF Pages)     │  HTTPS  │  Web API        │         │   (Railway)     │
 │                 │         │  (Railway)      │         │                 │
 └─────────────────┘         └────────┬────────┘         └─────────────────┘
                                      │
-                                     ▼
-                            ┌─────────────────┐
-                            │  Redis Cache    │
-                            │  (Upstash)      │
-                            └─────────────────┘
+                            ┌────────┴────────┐
+                            │                 │
+                            ▼                 ▼
+                   ┌─────────────────┐ ┌─────────────────┐
+                   │  Redis Cache    │ │  Cloudflare R2  │
+                   │  (Upstash)      │ │  (Storage)      │
+                   └─────────────────┘ └─────────────────┘
+```
+
+### Estrutura de Diretórios
+
+```
+hrms/
+├── backend/
+│   ├── src/
+│   │   ├── HRMS.Domain/           # Entidades, Value Objects, Domain Events
+│   │   ├── HRMS.Application/      # Use Cases, Commands, Queries, DTOs
+│   │   ├── HRMS.Infrastructure/   # EF Core, Repositórios, Serviços externos
+│   │   └── HRMS.API/              # Controllers, Middlewares, Configuração
+│   ├── tests/
+│   │   ├── HRMS.Domain.Tests/
+│   │   ├── HRMS.Application.Tests/
+│   │   ├── HRMS.Infrastructure.Tests/
+│   │   └── HRMS.API.Tests/
+│   ├── HRMS.sln
+│   └── docker-compose.yml
+│
+├── frontend/
+│   └── hrms-web/
+│       ├── src/
+│       │   └── app/
+│       │       ├── core/          # Serviços singleton, guards, interceptors
+│       │       ├── shared/        # Componentes reutilizáveis, pipes, directives
+│       │       ├── features/      # Módulos de funcionalidades
+│       │       │   ├── colaboradores/
+│       │       │   ├── ferias/
+│       │       │   ├── ponto/
+│       │       │   ├── avaliacoes/
+│       │       │   └── dashboard/
+│       │       └── layout/        # Estrutura visual (header, sidebar)
+│       ├── angular.json
+│       └── package.json
+│
+├── docs/
+│   ├── API.md
+│   ├── ARCHITECTURE.md
+│   └── DEPLOYMENT.md
+│
+├── .github/
+│   └── workflows/
+│       ├── backend-ci.yml
+│       └── frontend-ci.yml
+│
+├── README.md
+└── LICENSE
 ```
 
 ### Backend - Clean Architecture
 
-O backend segue os princípios da Clean Architecture, separando responsabilidades em camadas bem definidas:
-
-```
-src/
-├── HRMS.Domain/           # Entidades, Value Objects, Domain Events
-├── HRMS.Application/      # Use Cases, Commands, Queries, DTOs
-├── HRMS.Infrastructure/   # EF Core, Repositórios, Serviços externos
-└── HRMS.API/              # Controllers, Middlewares, Configuração
-```
+O backend segue os princípios da Clean Architecture, separando responsabilidades em camadas bem definidas.
 
 **Fluxo de uma requisição:**
 
@@ -170,24 +207,9 @@ HTTP Request
                    └─────────────┘
 ```
 
-### Frontend - Arquitetura Modular
-
-```
-src/app/
-├── core/              # Serviços singleton, guards, interceptors
-├── shared/            # Componentes reutilizáveis, pipes, directives
-├── features/          # Módulos de funcionalidades
-│   ├── colaboradores/
-│   ├── ferias/
-│   ├── ponto/
-│   ├── avaliacoes/
-│   └── dashboard/
-└── layout/            # Estrutura visual (header, sidebar)
-```
-
 ### Design Patterns Utilizados
 
-#### Backend
+**Backend:**
 
 | Pattern | Aplicação |
 |---------|-----------|
@@ -200,7 +222,7 @@ src/app/
 | State | Máquina de estados para workflow de férias |
 | Result | Retorno explícito de sucesso/falha |
 
-#### Frontend
+**Frontend:**
 
 | Pattern | Aplicação |
 |---------|-----------|
@@ -212,7 +234,7 @@ src/app/
 
 ---
 
-## 📊 Modelagem de Dados
+## Modelagem de Dados
 
 ### Diagrama ER Simplificado
 
@@ -221,7 +243,7 @@ src/app/
 │   Colaborador   │       │ SolicitacaoFeria│       │  RegistroPonto  │
 ├─────────────────┤       ├─────────────────┤       ├─────────────────┤
 │ Id (PK)         │       │ Id (PK)         │       │ Id (PK)         │
-│ Nome            │──────<│ ColaboradorId   │       │ ColaboradorId   │
+│ Nome            │──────<│ ColaboradorId   │       │ ColaboradorId   │>──────│
 │ CPF             │       │ DataInicio      │       │ DataHora        │
 │ Email           │       │ DataFim         │       │ Tipo            │
 │ DataAdmissao    │       │ Status          │       │ Localizacao     │
@@ -245,17 +267,26 @@ src/app/
                           └─────────────────┘
 ```
 
+### Seed Data Inicial
+
+O sistema inclui dados de seed para desenvolvimento:
+
+- 3 departamentos (TI, RH, Financeiro)
+- 5 cargos (Desenvolvedor, Analista, Gerente, Diretor, Estagiário)
+- 1 usuário admin (admin@hrms.com / Admin@123)
+- 10 colaboradores de exemplo
+
 ---
 
-## 🚀 Instalação
+## Instalação
 
 ### Pré-requisitos
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Node.js 20+](https://nodejs.org/)
-- [PostgreSQL 16+](https://www.postgresql.org/download/)
-- [Redis 7+](https://redis.io/download/) (opcional para desenvolvimento local)
-- [Docker](https://www.docker.com/) (alternativa recomendada)
+- .NET 9 SDK (https://dotnet.microsoft.com/download/dotnet/9.0)
+- Node.js 20+ (https://nodejs.org/)
+- PostgreSQL 16+ (https://www.postgresql.org/download/)
+- Redis 7+ (https://redis.io/download/) - opcional para desenvolvimento local
+- Docker (https://www.docker.com/) - alternativa recomendada
 
 ### Opção 1: Docker Compose (Recomendado)
 
@@ -279,7 +310,7 @@ docker-compose up -d
 
 ```bash
 # Navegar para o diretório do backend
-cd src/HRMS.API
+cd backend/src/HRMS.API
 
 # Restaurar dependências
 dotnet restore
@@ -302,7 +333,7 @@ dotnet run
 
 ```bash
 # Navegar para o diretório do frontend
-cd src/hrms-web
+cd frontend/hrms-web
 
 # Instalar dependências
 npm install
@@ -353,7 +384,7 @@ export const environment = {
 
 ---
 
-## 📖 Documentação da API
+## Documentação da API
 
 ### Autenticação
 
@@ -426,7 +457,7 @@ curl -X POST https://localhost:5001/api/auth/login \
   }'
 ```
 
-**Resposta:**
+Resposta:
 
 ```json
 {
@@ -474,12 +505,13 @@ curl -X POST https://localhost:5001/api/ferias \
 
 ---
 
-## 🧪 Testes
+## Testes
 
 ### Backend
 
 ```bash
 # Executar todos os testes
+cd backend
 dotnet test
 
 # Executar com cobertura
@@ -493,6 +525,7 @@ dotnet test --filter Category=Integration
 
 ```bash
 # Testes unitários
+cd frontend/hrms-web
 ng test
 
 # Testes com cobertura
@@ -502,26 +535,15 @@ ng test --code-coverage
 ng e2e
 ```
 
-### Estrutura de Testes
-
-```
-tests/
-├── HRMS.Domain.Tests/           # Testes de entidades e regras de domínio
-├── HRMS.Application.Tests/      # Testes de handlers e validadores
-├── HRMS.Infrastructure.Tests/   # Testes de repositórios
-├── HRMS.API.Tests/              # Testes de integração da API
-└── HRMS.Web.Tests/              # Testes do frontend
-```
-
 ---
 
-## 🔐 Segurança
+## Segurança
 
 ### Autenticação
 
 - JWT com expiração de 1 hora
 - Refresh tokens com rotação
-- Senhas hasheadas com Argon2
+- Senhas hasheadas com BCrypt (cost factor 12)
 
 ### Autorização
 
@@ -544,7 +566,7 @@ O sistema implementa RBAC (Role-Based Access Control) com 4 perfis:
 
 ---
 
-## 📈 Monitoramento
+## Monitoramento
 
 ### Health Checks
 
@@ -573,7 +595,7 @@ Logs estruturados em JSON via Serilog:
 
 ---
 
-## 🤝 Contribuindo
+## Contribuindo
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
@@ -583,7 +605,7 @@ Logs estruturados em JSON via Serilog:
 
 ### Padrões de Commit
 
-Este projeto segue [Conventional Commits](https://www.conventionalcommits.org/):
+Este projeto segue Conventional Commits (https://www.conventionalcommits.org/):
 
 - `feat:` Nova funcionalidade
 - `fix:` Correção de bug
@@ -595,33 +617,25 @@ Este projeto segue [Conventional Commits](https://www.conventionalcommits.org/):
 
 ---
 
-## 📄 Licença
+## Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
 
 ---
 
-## 👤 Autor
+## Autor
 
 **Seu Nome**
 
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [Seu Nome](https://linkedin.com/in/seu-perfil)
+- GitHub: @seu-usuario (https://github.com/seu-usuario)
+- LinkedIn: Seu Nome (https://linkedin.com/in/seu-perfil)
 - Email: seu.email@exemplo.com
 
 ---
 
-## 🙏 Agradecimentos
+## Agradecimentos
 
-- [Documentação do .NET](https://docs.microsoft.com/dotnet/)
-- [Angular Docs](https://angular.dev/)
-- [Clean Architecture - Jason Taylor](https://github.com/jasontaylordev/CleanArchitecture)
-- [MediatR - Jimmy Bogard](https://github.com/jbogard/MediatR)
-
----
-
-<div align="center">
-
-Feito com ❤️ e muito ☕
-
-</div>
+- Documentação do .NET (https://docs.microsoft.com/dotnet/)
+- Angular Docs (https://angular.dev/)
+- Clean Architecture - Jason Taylor (https://github.com/jasontaylordev/CleanArchitecture)
+- MediatR - Jimmy Bogard (https://github.com/jbogard/MediatR)

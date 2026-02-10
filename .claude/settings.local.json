@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b \"D:\\\\Versionados_Projetos\\\\HRMS\\\\backend\")",
+      "Bash(mkdir:*)"
+    ]
+  }
+}
