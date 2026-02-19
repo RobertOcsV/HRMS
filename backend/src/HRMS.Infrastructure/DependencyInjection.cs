@@ -28,6 +28,7 @@ public static class DependencyInjection
             provider.GetRequiredService<HrmsDbContext>());
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
         // JWT Configuration
         var jwtSettings = new JwtSettings();
@@ -60,6 +61,8 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddHttpContextAccessor();
+
+
 
         return services;
     }

@@ -4,18 +4,18 @@ using HRMS.Application.Common.Interfaces;
 using HRMS.Domain.Entities;
 using HRMS.Domain.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+
 
 public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 {
-    private readonly IRepository<Usuario> _usuarioRepository;
+    private readonly IUsuarioRepository _usuarioRepository;
     private readonly IRepository<RefreshToken> _refreshTokenRepository;
     private readonly IJwtService _jwtService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUnitOfWork _unitOfWork;
 
     public LoginCommandHandler(
-        IRepository<Usuario> usuarioRepository,
+        IUsuarioRepository usuarioRepository,
         IRepository<RefreshToken> refreshTokenRepository,
         IJwtService jwtService,
         IPasswordHasher passwordHasher,
@@ -30,10 +30,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var usuario = await _usuarioRepository
-            .Query()
-            .Include(u => u.Colaborador)
-            .FirstOrDefaultAsync(u => u.Email == request.Email.ToLowerInvariant(), cancellationToken);
+        var usuario = await _usuarioRepository.ObterPorEmailComColaboradorAsync(request.Email);
 
         if (usuario is null)
             throw new UnauthorizedAccessException("Credenciais invalidas.");
@@ -49,7 +46,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         var accessToken = _jwtService.GerarAccessToken(usuario);
         var refreshToken = RefreshToken.Criar(usuario.Id);
 
-        await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
+        await _refreshTokenRepository.AdicionarAsync(refreshToken, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new LoginResponse(
